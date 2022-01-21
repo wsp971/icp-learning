@@ -10,40 +10,56 @@ actor {
         time:Time.Time;
         author:Text;
     };
-    public type Microblog =  actor { 
+    public type FollowAuthor = {
+        id:Principal;
+        name:Text;
+    };
+    public type Microblog =  actor {
         follow : shared (Principal) -> async (); //添加关注对象
-        follows : shared query () -> async [Principal]; //查询关注者
-        post : shared (Text) -> async (); //发布新消息
-        posts : shared query(since:Time.Time) -> async [Message]; //查询所有发布的消息
-        timeline :  shared  (since:Time.Time) -> async [Message]; // 返回所有关注者发布的消息
-        set_name: shared (name:Text) -> async () ; // 设置作者名字
-        get_name: shared query () ->async Text;
+        follows : shared query () -> async [FollowAuthor]; //查询关注者
+        post : shared (Text,Text) -> async (); //发布新消息
+        posts : shared query(Time.Time) -> async [Message]; //查询所有发布的消息
+        timeline :  shared  (Time.Time) -> async [Message]; // 返回所有关注者发布的消息
+        set_name : shared (Text) -> async () ; // 设置作者名字
+        get_name : shared query () -> async Text;  // 获取作者名字
     };
 
-    var followed:List.List<Principal> = List.nil();
-    var auto_name:Text = "31-王世平";
+    stable var followed:List.List<Principal> = List.nil();
+    stable var auth_name: Text = "31-王世平";
+    stable var messages: List.List<Message> = List.nil<Message>();
 
     public shared func follow(id : Principal):async() {
         followed:= List.push(id,followed);
     };
-    public shared query func follows() : async [Principal]{
-        List.toArray<Principal>(followed);
+
+    public shared  func follows() : async [FollowAuthor]{
+        var followAuthors:List.List<FollowAuthor> = List.nil<FollowAuthor>();
+        // let canister: Microblog = actor(Principal.toText(id1));
+        for( id1 in Iter.fromList(followed)) {
+            let canister: Microblog = actor(Principal.toText(id1));
+            let aaa :Text = await canister.get_name();
+            // await canister.posts(0);
+            // let author = {
+            //   id = id1;
+            //   name = name1;
+            // };
+            // followAuthors:= List.push(author,followAuthors);
+        };
+        List.toArray(followAuthors);
     };
 
-    stable var messages: List.List<Message> = List.nil<Message>();
-
-    public shared (msg) func post(secret:Text, text: Text): async () {
+    public shared (msg) func post(text: Text,secret:Text): async () {
         // 暂时注释掉调用验证
         // assert(Principal.toText(msg.caller) == "uf56a-ftd2m-vspy4-s3rg5-c2lu4-b5t5g-clru6-cd2e5-v53hf-6uo2c-7ae");
-// TODO 密码校验
-        if(msg != "wangshiping"){
-            return 
-        }
-        
+        // TODO 密码校验
+        // if(msg != "wangshiping"){
+        //     return 
+        // }
+
         let newMessage = {
             content = text;
             time = Time.now();
-            author = auto_name;
+            author = auth_name;
         };
         messages:= List.push(newMessage, messages);
     };
@@ -68,9 +84,9 @@ actor {
     };
 
     public shared query func get_name():async Text {
-        auto_name;
+      return auth_name;
     };
-    public shared func set_name(name:Text): async {
-        auth_name = name;
+    public shared func set_name(name:Text): async() {
+      auth_name := name;
     };
 };
