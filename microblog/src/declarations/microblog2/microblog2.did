@@ -8,14 +8,16 @@ type Message =
 type FollowAuthor = 
  record {
    id: principal;
-   name: text;
+   name: opt text;
  };
 service : {
   follow: (principal) -> ();
-  follows: () -> (vec FollowAuthor) query;
+  follows: () -> (vec FollowAuthor);
   get_name: () -> (text) query;
   post: (text, text) -> ();
   posts: (Time) -> (vec Message) query;
+  queryFollowsPosts: (principal, Time) -> (vec Message);
   set_name: (text) -> ();
   timeline: (Time) -> (vec Message);
+  unfollow: (principal) -> ();
 }

@@ -3,7 +3,8 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");
-const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const { VueLoaderPlugin } = require('vue-loader')
+// const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 function initCanisterEnv() {
   let localCanisters, prodCanisters;
@@ -57,7 +58,7 @@ module.exports = {
     minimizer: [new TerserPlugin()],
   },
   resolve: {
-    extensions: [".js", ".ts", ".jsx", ".tsx"],
+    extensions: [".js", ".ts",'.vue', ".jsx", ".tsx"],
     fallback: {
       assert: require.resolve("assert/"),
       buffer: require.resolve("buffer/"),
@@ -80,7 +81,7 @@ module.exports = {
     rules: [
       { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-      { test: /\.vue$/, loader: "vue-loader" }
+      { test: /\.vue$/, loader: "vue-loader" },
     ]
   },
   plugins: [

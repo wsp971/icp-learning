@@ -44,6 +44,9 @@
     "last 2 edge version"
   ],
   "dependencies": {
-    "vue": "^2.6.14"
+    "@nutui/nutui": "^2.3.7",
+    "dayjs": "^1.10.7",
+    "vue": "^2.6.14",
+    "weui": "^2.5.4"
   }
 }

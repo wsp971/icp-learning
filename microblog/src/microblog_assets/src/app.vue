@@ -1,131 +1,100 @@
 <template>
-  <main class="page  container"  >
-      <h1 class="page__hd">course5 - microblog:myname:{{myName}}</h1>
-      <div class="weui-flex">
-        <section class="weui-flex__item">
-          <div class="weui-cells__title">post microblog</div>
-          <div class="weui-form">
-              <div class="weui-form__text-area">
-                <h2 class="weui-form__title">post microblog</h2>
-              </div>
-              <div class="weui-form__control-area">
-                <div class="weui-cells">
-                  <label for="blogText" class="weui-cell weui-cell_active">
-                    <div class="weui-cell__bd">
-                      <textarea name="blogText" cols="30" rows="5" class="weui-textarea"
-                        placeholder="请填写microblog 内容" v-model="microblog"></textarea>
-                    </div>
-                  </label>
-                  <label for="secret" class="weui-cell weui-cell_active">
-                    <div class="weui-cell__hd">
-                      <span class="weui-label">secret</span>
-                    </div>
-                    <div class="weui-cell__bd">
-                      <input type="text"  class="weui-input" v-model="secret">
-                    </div>
-                  </label>
-                </div>
-              </div>
-              <div class="weui-form__opr-area">
-                <button class="weui-btn weui-btn_primary" @click="doPost">posts</button>
-              </div>
-          </div>
-        </section>
-        <section class="weui-flex__item">
-          <div class="weui-cells__title">关注列表</div>
-          <div class="weui-cells">
-            <div class="weui-cell">
-              <div class="weui-cell__bd">
-                <p>王世平</p>
-              </div>
-              <div class="weui-cell__ft">canister:xxxxxxxx</div>
-            </div>
-            <div class="weui-cell">
-              <div class="weui-cell__bd">
-                <p>王世平</p>
-              </div>
-              <div class="weui-cell__ft">canister:xxxxxxxx</div>
-            </div>
-            <div class="weui-cell">
-              <div class="weui-cell__bd">
-                <p>王世平</p>
-              </div>
-              <div class="weui-cell__ft">canister:xxxxxxxx</div>
-            </div>
-          </div>
-        </section>
-        <section class="weui-flex__item ">
-          <div class="weui-cells__title">timeline</div>
-          <div class="weui-panel">
-            <div class="weui-panel__bd">
-              <div class="weui-media-box weui-media-box_text" v-for="blog in myPosts">
-                <strong class="weui-media-box__title">{{blog.time}}</strong>
-                <p class="weui-media-box__desc">{{blog.content}}</p>
-                <ul class="weui-media-box__info">
-                  <li class="weui-media-box__info__meta">canister</li>
-                  <li class="weui-media-box__info__meta">{{blog.content}}</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
+  <main class="page container" >
+    <Header :my-name="myName" @followSuccess="refrsh"/>
+      <div class="weui-flex content">
+        <Post />
+        <Follows @queryById="queryBlogById" ref="Follow"/>
+        <Timeline :timeline="timeline" :loading="isQueryTimeline"/>
       </div>
-    </main>
+  </main>
 </template>
 <script>
 import { microblog } from "../../declarations/microblog";
+
+import Header from './components/header.vue'
+import Post from './components/post.vue'
+import Follows from './components/follows.vue';
+import Timeline from './components/timeline.vue';
+
 export default {
   data(){
     return{
-      // 关注列表
-      follow_users:[],
-      // 
+      // 微博时间线
       timeline:[],
-      microblog:"",
-      secret:'',
+      // 我的发布
       myPosts:[],
-      myName:""
+      // 我的名字
+      myName:"",
+
+      isQueryTimeline:false
     }
   },
-  async mounted(){
-    await this.getName();
-    await this.posts();
+  components:{
+    Header,
+    Post,
+    Follows,
+    Timeline
   },
+  async mounted(){
+    try {
+      // 获取我的名字
+      await this.getName();
+      // 获取时间线
+      await this.getTimeline();
+    } catch (error) {
+    }
+  },
+  
   methods:{
     async getName(){
       this.myName = await  microblog.get_name();
     },
+    // 设置我的名称
     async setName(){
       await microblog.set_name("ssss");
     },
+    async refrsh(){
+      // 获取时间线
+      await this.getTimeline();
+      await this.$refs.Follow.follows();
+    
+    },
+    // 获取微博
     async getTimeline(){
-      const timeline = await microblog.timeline();
+      this.isQueryTimeline = true;
+      const timeline = await microblog.timeline(0);
       this.timeline = timeline;
+      this.isQueryTimeline = false;
     },
-    async doPost(){
-      if(!(this.microblog && this.secret)){
-        alert("param error");
-        return;
-      }
-      try {
-        await microblog.post(this.microblog, this.secret);
-      } catch (error) {
-        alert('error');
-      }
-      this.microblog = '';
-      this.secret = '';
-      this.posts();
-    },
+    
+    //获取我的发布
     async posts(){
       const result = await microblog.posts(0);
       this.myPosts = result;
     },
-    async follow(canistid){
-      await microblog.follow(canistid);
-    },
-    async follows(){
-      await microblog.follows();
+    
+  
+    
+    // 查询某个人的微博
+    async queryBlogById(id){
+      try {
+        this.isQueryTimeline = true;
+        console.log('id',id);
+        const result  = await microblog.queryFollowsPosts(id,0);
+        this.timeline  = result;
+        console.log('success',result);
+      } catch (error) {
+        alert('error');
+        console.error(error,'queryBlogByid');
+      }
+      this.isQueryTimeline = false;
     }
   }
 }
 </script>
+
+<style>
+  .content {
+    height: calc(100vh - var(--header-height));
+  }
+</style>
