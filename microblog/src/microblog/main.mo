@@ -82,11 +82,6 @@ actor {
             let userBlogs = await queryFollowsPosts(id,since);
             let userBlogsList:List.List<Message> = List.fromArray(userBlogs);
             all:= List.merge<Message>(all, userBlogsList,func(a,b){ return a.time < b.time;});
-            // let canister: Microblog = actor(Principal.toText(id));
-            // let msgs:[Message] = await canister.posts(since);
-            // for(msg in Iter.fromArray(msgs)){
-            //     all:=List.push(msg,all);
-            // };
         };
         List.toArray(all);
     };

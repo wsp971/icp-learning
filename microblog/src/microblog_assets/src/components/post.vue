@@ -15,10 +15,10 @@
               </label>
               <label for="secret" class="weui-cell weui-cell_active">
                 <div class="weui-cell__hd">
-                  <span class="weui-label">secret</span>
+                  <span class="weui-label">password</span>
                 </div>
                 <div class="weui-cell__bd">
-                  <input type="text"  class="weui-input" v-model="secret">
+                  <input type="text"  class="weui-input" placeholder="请输入密码" v-model="secret">
                 </div>
               </label>
             </div>

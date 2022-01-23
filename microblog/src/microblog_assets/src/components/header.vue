@@ -4,7 +4,7 @@
       <div class="weui-flex">
         <div class="weui-flex__item">
           <strong class="weui-media-box__title">courser5: microblog </strong>
-          <p class="weui-media-box__desc">myname: {{myName}},canister: <strong>zwgqu-qyaaa-aaaai-abgpq-cai</strong></p>      
+          <p class="weui-media-box__desc">myname: {{myName}},canister: <strong style="color: var(--weui-BRAND)">zwgqu-qyaaa-aaaai-abgpq-cai</strong>, please follow me !</p>      
         </div>
         <label class=" weui-flex weui-cell_active" style="width: 500px;">
           <div class="weui-cell__hd"><span class="weui-label">pricipleid</span></div>

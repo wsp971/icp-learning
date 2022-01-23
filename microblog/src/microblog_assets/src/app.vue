@@ -3,8 +3,8 @@
     <Header :my-name="myName" @followSuccess="refrsh"/>
       <div class="weui-flex content">
         <Post />
-        <Follows @queryById="queryBlogById" ref="Follow"/>
-        <Timeline :timeline="timeline" :loading="isQueryTimeline"/>
+        <Follows @queryById="queryBlogById" ref="Follow" @myposts="posts"/>
+        <Timeline :timeline="timeline" :myPosts="myPosts" :loading="timelineLoading"  :pid="pid" @back="back"/>
       </div>
   </main>
 </template>
@@ -25,8 +25,9 @@ export default {
       myPosts:[],
       // 我的名字
       myName:"",
-
-      isQueryTimeline:false
+      isQueryMyposts:false,
+      isQueryTimeline:false,
+      pid:''
     }
   },
   components:{
@@ -38,9 +39,9 @@ export default {
   async mounted(){
     try {
       // 获取我的名字
-      await this.getName();
+      this.getName();
       // 获取时间线
-      await this.getTimeline();
+      this.getTimeline();
     } catch (error) {
     }
   },
@@ -55,30 +56,46 @@ export default {
     },
     async refrsh(){
       // 获取时间线
-      await this.getTimeline();
-      await this.$refs.Follow.follows();
-    
+      this.$refs.Follow.follows();
+      this.back();
+    },
+    back(){
+      this.pid = '';
+      this.timeline=[];
+      this.myPosts = [];
+      this.getTimeline();
     },
     // 获取微博
     async getTimeline(){
-      this.isQueryTimeline = true;
-      const timeline = await microblog.timeline(0);
-      this.timeline = timeline;
-      this.isQueryTimeline = false;
+      try {
+        this.isQueryTimeline = true;
+        const timeline = await microblog.timeline(0);
+        this.timeline = timeline;
+        this.isQueryTimeline = false;
+      } catch (error) {
+        console.log('queryTimeline',error)
+      } 
     },
     
     //获取我的发布
     async posts(){
-      const result = await microblog.posts(0);
-      this.myPosts = result;
+      try {
+        this.isQueryMyposts = true;
+        const result = await microblog.posts(0);
+        this.myPosts = result;
+      } catch (error) {
+        console.log('get my Posts error',error);
+      }
+      this.isQueryMyposts = false;
     },
-    
-  
     
     // 查询某个人的微博
     async queryBlogById(id){
       try {
         this.isQueryTimeline = true;
+        this.pid=id;
+        this.myPosts = [];
+        this.timeline = [];
         console.log('id',id);
         const result  = await microblog.queryFollowsPosts(id,0);
         this.timeline  = result;
@@ -88,6 +105,11 @@ export default {
         console.error(error,'queryBlogByid');
       }
       this.isQueryTimeline = false;
+    }
+  },
+  computed:{
+    timelineLoading(){
+      return this.isQueryTimeline || this.isQueryMyposts;
     }
   }
 }

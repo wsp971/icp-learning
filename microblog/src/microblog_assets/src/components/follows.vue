@@ -1,7 +1,7 @@
 <template>
   <section class="weui-flex__item">
-    <div class="weui-cells__title">关注列表</div>
-    <div class="weui-cells"  style="height:100%; overflow:scroll;">
+    <div class="weui-cells__title">my follows</div>
+    <div class="weui-cells"  >
       <InlineLoading :isShow="loading"/>
       <a class="weui-cell  weui-cell_access" v-for="(user,index) in followUsers" :key="index" @click="queryBlogById(user.id)">
         <span class="weui-cell__bd">
@@ -11,6 +11,15 @@
         <span class="weui-cell__ft">
         </span>
       </a>
+      <div class="weui-loadmore weui-loadmore_line" v-show="noData">
+          <span class="weui-loadmore__tips">还没有关注任何人哦~</span>
+      </div>
+    </div>
+    <div class="my-posts">
+      <a class="weui-cell weui-cell_active weui-cell_access weui-cell_link" @click="myPosts">
+          <span class="weui-cell__bd">my posts</span>
+          <span class="weui-cell__ft"></span>
+      </a>    
     </div>
   </section>
 </template>
@@ -36,6 +45,11 @@ export default {
   async mounted(){
     await this.follows();
   },
+  computed:{
+    noData(){
+      return !this.loading && this.followUsers.length==0
+    }
+  },
   methods:{
       // 查询关注者
     async follows(){
@@ -51,8 +65,17 @@ export default {
     },
     queryBlogById(id){
       this.$emit('queryById',id);
+    },
+    myPosts(){
+      this.$emit('myposts');
     }
   }
   
 }
 </script>
+<style>
+  .my-posts{
+    background: #fff;
+    margin-top: 10px;
+  }
+</style>
