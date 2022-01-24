@@ -70,7 +70,6 @@ export default {
       this.$emit('myposts');
     }
   }
-  
 }
 </script>
 <style>

@@ -10,7 +10,6 @@
 </template>
 <script>
 import { microblog } from "../../declarations/microblog";
-
 import Header from './components/header.vue'
 import Post from './components/post.vue'
 import Follows from './components/follows.vue';
@@ -45,7 +44,6 @@ export default {
     } catch (error) {
     }
   },
-  
   methods:{
     async getName(){
       this.myName = await  microblog.get_name();
@@ -60,6 +58,9 @@ export default {
       this.back();
     },
     back(){
+      if(this.timelineLoading){
+        return;
+      }
       this.pid = '';
       this.timeline=[];
       this.myPosts = [];
@@ -67,6 +68,9 @@ export default {
     },
     // 获取微博
     async getTimeline(){
+      if(this.timelineLoading){
+        return;
+      }
       try {
         this.isQueryTimeline = true;
         const timeline = await microblog.timeline(0);
@@ -74,11 +78,13 @@ export default {
         this.isQueryTimeline = false;
       } catch (error) {
         console.log('queryTimeline',error)
-      } 
+      }
     },
-    
     //获取我的发布
     async posts(){
+      if(this.timelineLoading){
+        return;
+      }
       try {
         this.isQueryMyposts = true;
         const result = await microblog.posts(0);
@@ -88,9 +94,11 @@ export default {
       }
       this.isQueryMyposts = false;
     },
-    
     // 查询某个人的微博
     async queryBlogById(id){
+      if(this.timelineLoading){
+        return;
+      }
       try {
         this.isQueryTimeline = true;
         this.pid=id;
@@ -115,8 +123,26 @@ export default {
 }
 </script>
 
-<style>
+<style >
   .content {
     height: calc(100vh - var(--header-height));
+  }
+ 
+  @media screen and (max-width:375px){
+    .weui-flex.content{
+      overflow: scroll;
+    }
+    .weui-flex__item{
+      width: 100%;
+      box-sizing: border-box;
+      flex: auto;
+    }
+    body{
+      --header-height: 130px;
+    }
+
+    .weui-form{
+      min-height: unset;
+    }
   }
 </style>
